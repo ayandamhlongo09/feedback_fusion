@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:avatar_glow/avatar_glow.dart';
+import 'package:feedback_fusion/router/router.dart';
 import 'package:feedback_fusion/utils/values/colors.dart';
+import 'package:feedback_fusion/viewmodels/user_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -35,6 +39,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 500),
     )..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
+          checkTokenAndNavigate();
           Timer(
             const Duration(milliseconds: 300),
             () {},
@@ -50,6 +55,16 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   void dispose() {
     scaleController.dispose();
     super.dispose();
+  }
+
+  Future<void> checkTokenAndNavigate() async {
+    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+
+    if (await userViewModel.isTokenValid()) {
+      GoRouter.of(context).replaceNamed(AppRoutes.login);
+    } else {
+      GoRouter.of(context).replaceNamed(AppRoutes.login);
+    }
   }
 
   @override
