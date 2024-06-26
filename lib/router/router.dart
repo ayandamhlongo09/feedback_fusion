@@ -1,8 +1,10 @@
+import 'package:feedback_fusion/pages/login.dart';
 import 'package:feedback_fusion/pages/splash.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRoutes {
   static const String splash = "splash";
+  static const String login = "login";
 
   static GoRouter router = GoRouter(
     routes: [
@@ -10,6 +12,11 @@ class AppRoutes {
         name: splash,
         path: "/",
         builder: (context, state) => const SplashPage(),
+      ),
+      GoRoute(
+        name: login,
+        path: "/login",
+        builder: (context, state) => const LoginPage(),
       ),
     ],
   );

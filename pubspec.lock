@@ -158,6 +158,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_conditional_rendering:
+    dependency: "direct main"
+    description:
+      name: flutter_conditional_rendering
+      sha256: "430178af6a52d2aff5ee5764436ff44832d47ebd3ebc2b47089e8278e8bd15f7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
+  flutter_form_builder:
+    dependency: "direct main"
+    description:
+      name: flutter_form_builder
+      sha256: "447f8808f68070f7df968e8063aada3c9d2e90e789b5b70f3b44e4b315212656"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.3.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -166,6 +182,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_localizations:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_secure_storage:
     dependency: "direct main"
     description:
@@ -224,6 +245,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  form_builder_validators:
+    dependency: "direct main"
+    description:
+      name: form_builder_validators
+      sha256: "475853a177bfc832ec12551f752fd0001278358a6d42d2364681ff15f48f67cf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.0.1"
   get_it:
     dependency: "direct main"
     description:
@@ -280,6 +309,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.0"
   js:
     dependency: transitive
     description:
