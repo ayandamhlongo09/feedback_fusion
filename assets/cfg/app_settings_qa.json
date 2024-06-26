@@ -1,0 +1,5 @@
+{
+  "appName": "Feedback Fusion",
+  "slogan": "Empowering better services with every feedback",
+  "apiBaseUrl" : "http://localhost:5227/api"
+}

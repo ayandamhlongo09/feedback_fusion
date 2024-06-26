@@ -1,6 +1,15 @@
+import 'package:feedback_fusion/router/router.dart';
+import 'package:feedback_fusion/utils/app_providers.dart';
+import 'package:feedback_fusion/utils/service_locator.dart';
+import 'package:feedback_fusion/utils/values/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:global_configuration/global_configuration.dart';
+import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GlobalConfiguration().loadFromAsset("app_settings_qa");
+  registerServices();
   runApp(const MyApp());
 }
 
@@ -9,22 +18,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: appProviders,
+      child: MaterialApp.router(
+        title: GlobalConfiguration().getValue<String>('appName'),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.blue),
+          useMaterial3: true,
+        ),
+        routerConfig: AppRoutes.router,
       ),
-      home: const MyHomePage(),
     );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
   }
 }
