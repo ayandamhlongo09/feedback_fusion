@@ -12,26 +12,35 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormBuilderState>();
-  final _forgotPasswordFormKey = GlobalKey<FormBuilderState>();
-  final _emailFieldKey = GlobalKey<FormBuilderFieldState>();
+
+  final TextEditingController _fistNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool _obscureText = true;
 
   @override
+  void initState() {
+    SystemChannels.textInput.invokeMethod('TextInput.hide'); //hides keyboard
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _fistNameController.dispose();
+    _lastNameController.dispose();
 
     super.dispose();
   }
@@ -39,14 +48,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<UserViewModel>(builder: (BuildContext context, UserViewModel loginViewModel, _) {
+      body: Consumer<UserViewModel>(builder: (BuildContext context, UserViewModel userViewModel, _) {
         return ConditionalSwitch.single<LoadingStatus>(
           context: context,
-          valueBuilder: (BuildContext context) => loginViewModel.status,
+          valueBuilder: (BuildContext context) => userViewModel.status,
           caseBuilders: {
             LoadingStatus.busy: (BuildContext context) => const LoadingWidget(),
-            LoadingStatus.failed: (BuildContext context) => loginInterface(userViewModel: loginViewModel),
-            LoadingStatus.idle: (BuildContext context) => loginInterface(userViewModel: loginViewModel),
+            LoadingStatus.failed: (BuildContext context) => _signUpInterface(userViewModel: userViewModel),
+            LoadingStatus.idle: (BuildContext context) => _signUpInterface(userViewModel: userViewModel),
             LoadingStatus.completed: (BuildContext context) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 GoRouter.of(context).replaceNamed(AppRoutes.splash);
@@ -60,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget loginInterface({required UserViewModel userViewModel}) {
+  Widget _signUpInterface({required UserViewModel userViewModel}) {
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -68,40 +77,33 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(
               height: 30.0,
             ),
-            _loginHeading(),
+            _registerHeading(),
             const SizedBox(
-              height: 15.0,
+              height: 10.0,
             ),
-            _loginSubHeading(),
+            _registerSubHeading(),
             Container(
-              margin: const EdgeInsets.only(top: 60.0, left: 40.0, right: 40.0, bottom: 15.0),
-              child: Column(
-                children: <Widget>[
-                  _loginForm(userViewModel),
-                  if (userViewModel.errorMessage != null) ...[
-                    Text(
-                      userViewModel.errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+                margin: const EdgeInsets.only(top: 15.0, left: 40.0, right: 40.0, bottom: 15.0),
+                child: Column(
+                  children: <Widget>[
+                    _signUpForm(userViewModel),
+                    if (userViewModel.errorMessage != null) ...[
+                      Text(
+                        userViewModel.errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+                    CheckboxListTile(
+                      value: userViewModel.rememberMe,
+                      title: const Text('Remember Me'),
+                      onChanged: (newValue) {
+                        userViewModel.saveRememberMeValue(newValue ?? false);
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: const EdgeInsets.all(0),
                     ),
                   ],
-                  TextButton(
-                    child: const Text(' Forgot password?', style: TextStyle(color: AppColors.blue, fontSize: 14)),
-                    onPressed: () {
-                      showForgotPasswordPopUp(userViewModel);
-                    },
-                  ),
-                  CheckboxListTile(
-                    value: userViewModel.rememberMe,
-                    title: const Text('Remember Me'),
-                    onChanged: (newValue) {
-                      userViewModel.saveRememberMeValue(newValue ?? false);
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: const EdgeInsets.all(0),
-                  )
-                ],
-              ),
-            ),
+                )),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
@@ -113,33 +115,34 @@ class _LoginPageState extends State<LoginPage> {
                   color: AppColors.blue,
                   onPressed: () {
                     if (_formKey.currentState?.saveAndValidate() ?? false) {
-                      String email = _emailController.text;
-                      String password = _passwordController.text;
-                      userViewModel.handleLogin(email: email, password: password);
+                      userViewModel.handleRegistration({
+                        'email': _emailController.text,
+                        'password': _passwordController.text,
+                        'firstName': _fistNameController.text,
+                        'lastName': _lastNameController.text,
+                      });
                       if (!userViewModel.isSignedIn) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(userViewModel.errorMessage ?? 'Login failed')),
+                          SnackBar(content: Text(userViewModel.errorMessage ?? 'Registration failed')),
                         );
                       }
                     }
                   },
-                  child: const Text('Login', style: TextStyle(color: Colors.white)),
+                  child: const Text('Register', style: TextStyle(color: Colors.white)),
                 ),
                 const SizedBox(
                   height: 15.0,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextButton(
-                      child: _dontHaveAnAccountText(),
-                      onPressed: () {
-                        GoRouter.of(context).replaceNamed(
-                          AppRoutes.register,
-                        );
-                      },
-                    ),
-                  ],
+                TextButton(
+                  child: _alreadyHaveAnAccountText(),
+                  onPressed: () {
+                    GoRouter.of(context).replaceNamed(
+                      AppRoutes.login,
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 30.0,
                 ),
               ],
             )
@@ -149,9 +152,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _loginHeading() {
+  Widget _registerHeading() {
     return const Text(
-      'Login',
+      'Register',
       textAlign: TextAlign.center,
       style: TextStyle(
         color: AppColors.blue,
@@ -161,9 +164,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _loginSubHeading() {
+  Widget _registerSubHeading() {
     return const Text(
-      'Log in to your Feedback Fusion account',
+      'Sign up to your Feedback Fusion account',
       textAlign: TextAlign.center,
       style: TextStyle(
         color: Colors.grey,
@@ -172,15 +175,50 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _loginForm(UserViewModel userViewModel) {
+  Widget _signUpForm(UserViewModel registerViewModel) {
     return FormBuilder(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           FormBuilderTextField(
+            controller: _fistNameController,
+            name: 'firstName',
+            decoration: const InputDecoration(labelText: 'First Name'),
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.required(),
+            ]),
+            onEditingComplete: () => FocusScope.of(context).nextFocus(),
+            inputFormatters: [
+              FilteringTextInputFormatter.deny(
+                RegExp(numberPattern.toString()),
+              ),
+              LengthLimitingTextInputFormatter(50),
+            ],
+          ),
+          const SizedBox(
+            height: 15.0,
+          ),
+          FormBuilderTextField(
+            controller: _lastNameController,
+            name: 'lastName',
+            decoration: const InputDecoration(labelText: 'Last Name'),
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.required(),
+            ]),
+            onEditingComplete: () => FocusScope.of(context).nextFocus(),
+            inputFormatters: [
+              FilteringTextInputFormatter.deny(
+                RegExp(numberPattern.toString()),
+              ),
+              LengthLimitingTextInputFormatter(50),
+            ],
+          ),
+          const SizedBox(
+            height: 15.0,
+          ),
+          FormBuilderTextField(
             controller: _emailController,
-            key: _emailFieldKey,
             name: 'email',
             decoration: const InputDecoration(labelText: 'Email'),
             validator: FormBuilderValidators.compose([
@@ -191,6 +229,7 @@ class _LoginPageState extends State<LoginPage> {
             onEditingComplete: () => FocusScope.of(context).nextFocus(),
             inputFormatters: [
               FilteringTextInputFormatter.deny(
+                //checks if charcaters / , \ and spaces are present, then they get denied
                 RegExp('${r'[/\\' + noSpacePattern.toString()} ]'),
               ),
               LengthLimitingTextInputFormatter(40),
@@ -218,6 +257,12 @@ class _LoginPageState extends State<LoginPage> {
               FormBuilderValidators.required(),
               FormBuilderValidators.minLength(6),
             ]),
+            // onChanged: (value) {
+            //   _credentials[LoginFormField.password] = value;
+            // },
+            // onSaved: (value) {
+            //   _credentials[LoginFormField.password] = value;
+            // },
             inputFormatters: [
               FilteringTextInputFormatter.deny(
                 RegExp(r'\s'),
@@ -231,77 +276,16 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> showForgotPasswordPopUp(UserViewModel userViewModel) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            "Forgot Password",
-            style: TextStyle(fontSize: 20),
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                const Text(
-                  'Send OTP Code to email:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.normal,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(
-                  height: 25,
-                ),
-                Form(
-                  key: _forgotPasswordFormKey,
-                  child: FormBuilderTextField(
-                    key: _emailFieldKey,
-                    name: 'email',
-                    controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.email(),
-                    ]),
-                    keyboardType: TextInputType.emailAddress,
-                    onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.deny(
-                        //checks if charcaters / , \ and spaces are present, then they get denied
-                        RegExp('${r'[/\\' + noSpacePattern.toString()} ]'),
-                      ),
-                      LengthLimitingTextInputFormatter(40),
-                    ],
-                    autofocus: true,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    initialValue: _emailController.text,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {},
-              child: const Text("Send"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _dontHaveAnAccountText() {
+  Widget _alreadyHaveAnAccountText() {
     return RichText(
       text: const TextSpan(
         children: <TextSpan>[
           TextSpan(
-            text: 'Don\'t have an account?',
+            text: 'Already have an account?',
             style: TextStyle(color: Colors.grey, fontSize: 15),
           ),
           TextSpan(
-            text: '  Register',
+            text: '  Login',
             style: TextStyle(color: AppColors.blue, fontSize: 18),
           ),
         ],
