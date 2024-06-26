@@ -58,7 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
             LoadingStatus.idle: (BuildContext context) => _signUpInterface(userViewModel: userViewModel),
             LoadingStatus.completed: (BuildContext context) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                GoRouter.of(context).replaceNamed(AppRoutes.splash);
+                GoRouter.of(context).replaceNamed(AppRoutes.home);
               });
               return const SizedBox();
             },

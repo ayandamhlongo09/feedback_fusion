@@ -49,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
             LoadingStatus.idle: (BuildContext context) => loginInterface(userViewModel: loginViewModel),
             LoadingStatus.completed: (BuildContext context) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                GoRouter.of(context).replaceNamed(AppRoutes.splash);
+                GoRouter.of(context).replaceNamed(AppRoutes.home);
               });
               return const SizedBox();
             },
